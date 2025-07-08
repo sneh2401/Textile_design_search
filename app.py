@@ -149,6 +149,7 @@ def index():
     index_images(dataset, index)
 
     return 'Image indexing completed.'
+ #heelo 
 
 
 def search_images(query, index, limit=10):

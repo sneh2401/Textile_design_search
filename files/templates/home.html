@@ -1,260 +1,383 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Design Search</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/></circle><circle cx="80" cy="40" r="3" fill="white" opacity="0.1"><animate attributeName="opacity" values="0.1;0.4;0.1" dur="4s" repeatCount="indefinite"/></circle><circle cx="60" cy="80" r="2" fill="white" opacity="0.1"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="5s" repeatCount="indefinite"/></circle></svg>');
+      }
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        max-width: 450px;
+        width: 90%;
+        text-align: center;
+        animation: slideUp 0.6s ease-out;
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(30px);
+          opacity: 0;
         }
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/></circle><circle cx="80" cy="40" r="3" fill="white" opacity="0.1"><animate attributeName="opacity" values="0.1;0.4;0.1" dur="4s" repeatCount="indefinite"/></circle><circle cx="60" cy="80" r="2" fill="white" opacity="0.1"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="5s" repeatCount="indefinite"/></circle></svg>');
+        to {
+          transform: translateY(0);
+          opacity: 1;
         }
+      }
+      h1 {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        animation: glow 2s ease-in-out infinite alternate;
+      }
+      @keyframes glow {
+        to {
+          filter: brightness(1.2);
+        }
+      }
+      .subtitle {
+        color: #64748b;
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+      }
+      .upload-zone {
+        border: 2px dashed #cbd5e0;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      }
+      .upload-zone:hover,
+      .upload-zone.dragover {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #f0f4ff, #e6f3ff);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+      }
+      .upload-zone input {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+      .upload-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .upload-icon {
+        width: 40px;
+        height: 40px;
+        color: #667eea;
+        transition: transform 0.3s ease;
+      }
+      .upload-zone:hover .upload-icon {
+        transform: scale(1.1);
+      }
+      .upload-text {
+        font-weight: 600;
+        color: #475569;
+      }
+      .upload-subtext {
+        font-size: 0.9rem;
+        color: #64748b;
+      }
+      .file-info {
+        display: none;
+        background: #f1f5f9;
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: #475569;
+      }
+      .file-info.show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+      .image-preview {
+        display: none;
+        margin-top: 1rem;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .image-preview.show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+      .preview-image {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+      }
+      .preview-image:hover {
+        transform: scale(1.02);
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .input-group {
+        margin-bottom: 1.5rem;
+        text-align: left;
+      }
+      .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #475569;
+      }
+      .input-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+      }
+      .input-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+      }
+      .btn-group {
+        display: flex;
+        gap: 1rem;
+      }
+      .btn {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+      .btn:hover::before {
+        left: 100%;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      }
+      .btn-primary:hover {
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+      .btn-secondary {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      }
+      .btn-secondary:hover {
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+      }
+      @media (max-width: 600px) {
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 450px;
-            width: 90%;
-            text-align: center;
-            animation: slideUp 0.6s ease-out;
+          padding: 2rem;
+          margin: 1rem;
         }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         h1 {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            animation: glow 2s ease-in-out infinite alternate;
+          font-size: 1.8rem;
         }
-        @keyframes glow { to { filter: brightness(1.2); } }
-        .subtitle { color: #64748b; margin-bottom: 2rem; font-size: 1.1rem; }
-        .upload-zone {
-            border: 2px dashed #cbd5e0;
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        .btn-group {
+          flex-direction: column;
         }
-        .upload-zone:hover, .upload-zone.dragover {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #f0f4ff, #e6f3ff);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
-        }
-        .upload-zone input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-        .upload-content { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
-        .upload-icon { width: 40px; height: 40px; color: #667eea; transition: transform 0.3s ease; }
-        .upload-zone:hover .upload-icon { transform: scale(1.1); }
-        .upload-text { font-weight: 600; color: #475569; }
-        .upload-subtext { font-size: 0.9rem; color: #64748b; }
-        .file-info {
-            display: none;
-            background: #f1f5f9;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #475569;
-        }
-        .file-info.show { display: block; animation: fadeIn 0.3s ease; }
-        .image-preview {
-            display: none;
-            margin-top: 1rem;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        .image-preview.show { display: block; animation: fadeIn 0.3s ease; }
-        .preview-image {
-            width: 100%;
-            max-height: 200px;
-            object-fit: cover;
-            border-radius: 12px;
-            transition: transform 0.3s ease;
-        }
-        .preview-image:hover { transform: scale(1.02); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .input-group { margin-bottom: 1.5rem; text-align: left; }
-        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; }
-        .input-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #f8fafc;
-        }
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            background: white;
-        }
-        .btn-group { display: flex; gap: 1rem; }
-        .btn {
-            flex: 1;
-            padding: 0.875rem 1.5rem;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-        .btn:hover::before { left: 100%; }
-        .btn:hover { transform: translateY(-2px); }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        .btn-primary:hover { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
-        .btn-secondary {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        .btn-secondary:hover { box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4); }
-        @media (max-width: 600px) {
-            .container { padding: 2rem; margin: 1rem; }
-            h1 { font-size: 1.8rem; }
-            .btn-group { flex-direction: column; }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>Design Search</h1>
-        <p class="subtitle">Upload a design to find similar images</p>
-        
-        <form action="/search" method="POST" enctype="multipart/form-data">
-            <div class="upload-zone" id="upload-zone">
-                <input type="file" name="file" accept="image/*" id="file-input" required>
-                <div class="upload-content">
-                    <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                    </svg>
-                    <div class="upload-text">Drop image here</div>
-                    <div class="upload-subtext">or click to browse</div>
-                </div>
-            </div>
-            <div class="file-info" id="file-info">📄 <span id="file-name">No file selected</span></div>
-            
-            <div class="image-preview" id="image-preview">
-                <img id="preview-image" class="preview-image" alt="Preview">
-            </div>
-            
-            <div class="input-group">
-                <label for="limit">Number of Similar Images</label>
-                <input type="number" name="limit" id="limit" value="10" min="1" max="50">
-            </div>
-            
-            <div class="btn-group">
-                <button type="submit" class="btn btn-primary">🔍 Search</button>
-            </div>
-        </form>
-        
-        <form action="/index" method="POST" style="margin-top: 1rem;">
-            <div class="btn-group">
-                <button type="submit" class="btn btn-secondary">📂 Index Images</button>
-            </div>
-        </form>
+      <h1>Sneh's Design Search Project</h1>
+      <p class="subtitle">Upload a design to find similar images</p>
+
+      <form action="/search" method="POST" enctype="multipart/form-data">
+        <div class="upload-zone" id="upload-zone">
+          <input
+            type="file"
+            name="file"
+            accept="image/*"
+            id="file-input"
+            required
+          />
+          <div class="upload-content">
+            <svg
+              class="upload-icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              />
+            </svg>
+            <div class="upload-text">Drop image here</div>
+            <div class="upload-subtext">or click to browse</div>
+          </div>
+        </div>
+        <div class="file-info" id="file-info">
+          📄 <span id="file-name">No file selected</span>
+        </div>
+
+        <div class="image-preview" id="image-preview">
+          <img id="preview-image" class="preview-image" alt="Preview" />
+        </div>
+
+        <div class="input-group">
+          <label for="limit">Number of Similar Images</label>
+          <input
+            type="number"
+            name="limit"
+            id="limit"
+            value="10"
+            min="1"
+            max="50"
+          />
+        </div>
+
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary">🔍 Search</button>
+        </div>
+      </form>
+
+      <form action="/index" method="POST" style="margin-top: 1rem">
+        <div class="btn-group">
+          <button type="submit" class="btn btn-secondary">
+            📂 Index Images
+          </button>
+        </div>
+      </form>
     </div>
 
     <script>
-        const uploadZone = document.getElementById('upload-zone');
-        const fileInput = document.getElementById('file-input');
-        const fileInfo = document.getElementById('file-info');
-        const fileName = document.getElementById('file-name');
-        const imagePreview = document.getElementById('image-preview');
-        const previewImage = document.getElementById('preview-image');
+      const uploadZone = document.getElementById("upload-zone");
+      const fileInput = document.getElementById("file-input");
+      const fileInfo = document.getElementById("file-info");
+      const fileName = document.getElementById("file-name");
+      const imagePreview = document.getElementById("image-preview");
+      const previewImage = document.getElementById("preview-image");
 
-        function showImagePreview(file) {
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    imagePreview.classList.add('show');
-                };
-                reader.readAsDataURL(file);
-            }
+      function showImagePreview(file) {
+        if (file && file.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            previewImage.src = e.target.result;
+            imagePreview.classList.add("show");
+          };
+          reader.readAsDataURL(file);
         }
+      }
 
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files[0]) {
-                const file = e.target.files[0];
-                fileName.textContent = file.name;
-                fileInfo.classList.add('show');
-                showImagePreview(file);
-            }
-        });
+      fileInput.addEventListener("change", (e) => {
+        if (e.target.files[0]) {
+          const file = e.target.files[0];
+          fileName.textContent = file.name;
+          fileInfo.classList.add("show");
+          showImagePreview(file);
+        }
+      });
 
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.classList.add('dragover');
-        });
+      uploadZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadZone.classList.add("dragover");
+      });
 
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.classList.remove('dragover');
-        });
+      uploadZone.addEventListener("dragleave", () => {
+        uploadZone.classList.remove("dragover");
+      });
 
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-            if (e.dataTransfer.files[0]) {
-                const file = e.dataTransfer.files[0];
-                fileInput.files = e.dataTransfer.files;
-                fileName.textContent = file.name;
-                fileInfo.classList.add('show');
-                showImagePreview(file);
-            }
-        });
+      uploadZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove("dragover");
+        if (e.dataTransfer.files[0]) {
+          const file = e.dataTransfer.files[0];
+          fileInput.files = e.dataTransfer.files;
+          fileName.textContent = file.name;
+          fileInfo.classList.add("show");
+          showImagePreview(file);
+        }
+      });
 
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', (e) => {
-                const btn = form.querySelector('button');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = btn.classList.contains('btn-primary') ? '🔄 Searching...' : '⏳ Indexing...';
-                btn.disabled = true;
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                }, 5000);
-            });
+      document.querySelectorAll("form").forEach((form) => {
+        form.addEventListener("submit", (e) => {
+          const btn = form.querySelector("button");
+          const originalText = btn.innerHTML;
+          btn.innerHTML = btn.classList.contains("btn-primary")
+            ? "🔄 Searching..."
+            : "⏳ Indexing...";
+          btn.disabled = true;
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }, 5000);
         });
+      });
     </script>
-</body>
+  </body>
 </html>

@@ -1,41 +1,357 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Search Results</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}"
-    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 1rem;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/></circle><circle cx="80" cy="40" r="3" fill="white" opacity="0.1"><animate attributeName="opacity" values="0.1;0.4;0.1" dur="4s" repeatCount="indefinite"/></circle><circle cx="60" cy="80" r="2" fill="white" opacity="0.1"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="5s" repeatCount="indefinite"/></circle></svg>');
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        animation: slideUp 0.6s ease-out;
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(30px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      h1 {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+        animation: glow 2s ease-in-out infinite alternate;
+      }
+      @keyframes glow {
+        to {
+          filter: brightness(1.2);
+        }
+      }
+      .header-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+      .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+      .result-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        animation: fadeIn 0.5s ease-out;
+        animation-fill-mode: both;
+      }
+      .result-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .result-card:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+      .result-card:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .result-card:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      .result-card:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+      .result-card:nth-child(5) {
+        animation-delay: 0.5s;
+      }
+      .result-card:nth-child(n + 6) {
+        animation-delay: 0.6s;
+      }
+      .result-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+      .result-card:hover .result-image {
+        transform: scale(1.05);
+      }
+      .result-info {
+        padding: 1.5rem;
+      }
+      .result-rank {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+      .result-distance {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+      }
+      .result-path {
+        font-size: 0.9rem;
+        color: #64748b;
+        word-break: break-all;
+        background: #f8fafc;
+        padding: 0.5rem;
+        border-radius: 8px;
+        border-left: 3px solid #667eea;
+      }
+      .stats-bar {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+      }
+      .stat-item {
+        text-align: center;
+      }
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #667eea;
+      }
+      .stat-label {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+      }
+      .no-results {
+        text-align: center;
+        padding: 3rem;
+        color: #64748b;
+        font-size: 1.1rem;
+      }
+      .no-results-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+      @media (max-width: 768px) {
+        .container {
+          padding: 1rem;
+          margin: 1rem;
+        }
+        h1 {
+          font-size: 2rem;
+        }
+        .results-grid {
+          grid-template-columns: 1fr;
+        }
+        .stats-bar {
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .header-actions {
+          flex-direction: column;
+          align-items: center;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="container">
-      <h1>Search Results</h1>
-      <table class="results-table">
-        <thead>
-          <tr>
-            <th>Sr. No.</th>
-            <th>Design</th>
-            <th>Distance</th>
-            <th>Path</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for result in results %}
-          <tr>
-            <td>{{ loop.index }}</td>
-            <td>
-              <img
-                src="{{ url_for('static', filename='dataset/' + result[1]) }}"
-                alt="Result Image"
-                class="result-image"
-              />
-            </td>
-            <td>{{ result[0] }}</td>
-            <td>{{ result[1] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <h1>🔍 Search Results</h1>
+
+      <div class="header-actions">
+        <a href="/" class="btn">← Back to Search</a>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-value" id="total-results">
+            {{ results|length if results else 0 }}
+          </div>
+          <div class="stat-label">Results Found</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="best-match">
+            {{ "%.3f"|format(results[0][0]) if results else "N/A" }}
+          </div>
+          <div class="stat-label">Best Match</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="avg-distance">
+            {{ "%.3f"|format(results|sum(attribute=0)/results|length) if results
+            else "N/A" }}
+          </div>
+          <div class="stat-label">Avg Distance</div>
+        </div>
+      </div>
+
+      {% if results %}
+      <div class="results-grid">
+        {% for result in results %}
+        <div class="result-card">
+          <img
+            src="{{ url_for('static', filename='dataset/' + result[1]) }}"
+            alt="Result Image {{ loop.index }}"
+            class="result-image"
+            loading="lazy"
+          />
+          <div class="result-info">
+            <div class="result-rank">#{{ loop.index }}</div>
+            <div class="result-distance">
+              📏 Distance: {{ "%.4f"|format(result[0]) }}
+            </div>
+            <div class="result-path">📁 {{ result[1] }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="no-results">
+        <div class="no-results-icon">🔍</div>
+        <div>No similar images found</div>
+      </div>
+      {% endif %}
     </div>
+
+    <script>
+      // Add smooth scroll behavior
+      document.documentElement.style.scrollBehavior = "smooth";
+
+      // Add image loading animation
+      const images = document.querySelectorAll(".result-image");
+      images.forEach((img) => {
+        img.addEventListener("load", function () {
+          this.style.animation = "fadeIn 0.5s ease-out";
+        });
+      });
+
+      // Add click to zoom functionality
+      images.forEach((img) => {
+        img.addEventListener("click", function () {
+          const overlay = document.createElement("div");
+          overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.8);
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    animation: fadeIn 0.3s ease;
+                `;
+
+          const zoomedImg = document.createElement("img");
+          zoomedImg.src = this.src;
+          zoomedImg.style.cssText = `
+                    max-width: 90%;
+                    max-height: 90%;
+                    border-radius: 10px;
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                    transform: scale(0.8);
+                    transition: transform 0.3s ease;
+                `;
+
+          overlay.appendChild(zoomedImg);
+          document.body.appendChild(overlay);
+
+          setTimeout(() => (zoomedImg.style.transform = "scale(1)"), 10);
+
+          overlay.addEventListener("click", () => {
+            overlay.style.animation = "fadeOut 0.3s ease";
+            setTimeout(() => document.body.removeChild(overlay), 300);
+          });
+        });
+      });
+
+      // Add fadeOut animation
+      const style = document.createElement("style");
+      style.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        `;
+      document.head.appendChild(style);
+
+      // Add performance monitoring
+      window.addEventListener("load", () => {
+        const loadTime = performance.now();
+        console.log(`Page loaded in ${loadTime.toFixed(2)}ms`);
+      });
+    </script>
   </body>
 </html>

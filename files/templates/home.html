@@ -76,6 +76,7 @@
         transition: all 0.3s ease;
         cursor: pointer;
         background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        position: relative;
       }
       .upload-zone:hover,
       .upload-zone.dragover {
@@ -113,6 +114,22 @@
       .upload-subtext {
         font-size: 0.9rem;
         color: #64748b;
+      }
+      .upload-btn {
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.2s ease;
+      }
+      .upload-btn:hover {
+        background: #5a67d8;
+        transform: translateY(-1px);
       }
       .file-info {
         display: none;
@@ -256,29 +273,15 @@
 
       <form action="/search" method="POST" enctype="multipart/form-data">
         <div class="upload-zone" id="upload-zone">
-          <input
-            type="file"
-            name="file"
-            accept="image/*"
-            id="file-input"
-            required
-          />
+          <input type="file" name="file" accept="image/*" id="file-input" required />
           <div class="upload-content">
-            <svg
-              class="upload-icon"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-              />
+            <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
             <div class="upload-text">Drop image here</div>
-            <div class="upload-subtext">or click to browse</div>
+            <div class="upload-subtext">or</div>
+            <button type="button" class="upload-btn" onclick="fileInput.click()">📁 Upload Image</button>
           </div>
         </div>
         <div class="file-info" id="file-info">
@@ -291,14 +294,7 @@
 
         <div class="input-group">
           <label for="limit">Number of Similar Images</label>
-          <input
-            type="number"
-            name="limit"
-            id="limit"
-            value="10"
-            min="1"
-            max="50"
-          />
+          <input type="number" name="limit" id="limit" value="10" min="1" max="50" />
         </div>
 
         <div class="btn-group">
@@ -308,9 +304,7 @@
 
       <form action="/index" method="POST" style="margin-top: 1rem">
         <div class="btn-group">
-          <button type="submit" class="btn btn-secondary">
-            📂 Index Images
-          </button>
+          <button type="submit" class="btn btn-secondary">📂 Index Images</button>
         </div>
       </form>
     </div>

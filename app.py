@@ -162,7 +162,10 @@ def search_images(query, index, limit=10):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
+
 
 #upload the photos in the dataset ant then press index 
 # one time the the the index.csv file will get cordinate value in the index.csv 
